@@ -5,16 +5,21 @@ license-file: LICENSE
 maintainer: HATTORI,HIROKI <seagull.kamome@gmail.com>
 homepage: http://github.com/seagull-kamome/StateVar-transformer
 bug-reports: http://github.com/seagull-kamome/StateVar-transformer/issues
-source-repository head
-    type: git
-    location: git@github.com:seagull-kamome/StateVar-transformer.git
 category: Data
+cabal-version: >=1.8
 synopsis: State variables
 description: StateVar with monad transformer
 build-type: Simple
-exposed-modules: Data.StateVar.Trans
-hs-Source-Dirs: src
-ghc-options: -Wall
-build-depends: base >= 3 && < 5,
-               transformers,
-               mtl
+
+source-repository head
+    type: git
+    location: git@github.com:seagull-kamome/StateVar-transformer.git
+
+library
+    exposed-modules: Data.StateVar.Trans
+    hs-Source-Dirs: src
+    ghc-options: -Wall
+    build-depends: base >= 3 && < 5,
+                   transformers,
+                   mtl
+
