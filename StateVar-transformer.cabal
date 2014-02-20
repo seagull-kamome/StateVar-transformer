@@ -3,7 +3,11 @@ version: 1.0.0.0
 license: BSD3
 license-file: LICENSE
 maintainer: HATTORI,HIROKI <seagull.kamome@gmail.com>
-homepage: 
+homepage: http://github.com/seagull-kamome/StateVar-transformer
+bug-reports: http://github.com/seagull-kamome/StateVar-transformer/issues
+source-repository head
+    type: git
+    location: git@github.com:seagull-kamome/StateVar-transformer.git
 category: Data
 synopsis: State variables
 description: StateVar with monad transformer
