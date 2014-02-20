@@ -5,44 +5,12 @@
 -- Copyright   :  (c) Sven Panne 2009
 -- License     :  BSD-style (see the file LICENSE)
 -- 
--- Maintainer  :  sven.panne@aedion.de
+-- Maintainer  :  HATTORI, HIROKI <seagull.kamome@gmail.com>
 -- Stability   :  stable
 -- Portability :  portable
 --
--- State variables are references in the IO monad, like 'IORef's or parts of
--- the OpenGL state. Note that state variables are not neccessarily writable or
--- readable, they may come in read-only or write-only flavours, too. As a very
--- simple example for a state variable, consider an explicitly allocated memory
--- buffer. This buffer can easily be converted into a 'StateVar':
---
--- @
--- makeStateVarFromPtr :: Storable a => Ptr a -> StateVar a
--- makeStateVarFromPtr p = makeStateVar (peek p) (poke p)
--- @
---
--- The example below puts 11 into a state variable (i.e. into the buffer),
--- increments the contents of the state variable by 22, and finally prints the
--- resulting content:
---
--- @
---   do p <- malloc :: IO (Ptr Int)
---      let v = makeStateVarFromPtr p
---      v $= 11
---      v $~ (+ 22)
---      x <- get v
---      print x
--- @
---
--- 'IORef's are state variables, too, so an example with them looks extremely
--- similiar:
---
--- @
---   do v <- newIORef (0 :: Int)
---      v $= 11
---      v $~ (+ 22)
---      x <- get v
---      print x
--- @
+-- Data.StateVarがIO専用なのが気にくわないので変換できるようにしただけ
+-- 
 --------------------------------------------------------------------------------
 
 module Data.StateVar.Trans (
