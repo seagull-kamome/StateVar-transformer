@@ -1,0 +1,16 @@
+name: StateVar-transformer
+version: 1.0.0.0
+license: BSD3
+license-file: LICENSE
+maintainer: HATTORI,HIROKI <seagull.kamome@gmail.com>
+homepage: 
+category: Data
+synopsis: State variables
+description: StateVar with monad transformer
+build-type: Simple
+exposed-modules: Data.StateVar.Trans
+hs-Source-Dirs: src
+ghc-options: -Wall
+build-depends: base >= 3 && < 5,
+               transformers,
+               mtl
