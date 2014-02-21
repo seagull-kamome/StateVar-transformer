@@ -27,7 +27,10 @@ module Data.StateVar.Trans (
    (&), (^=), (^~), (^=!), (^~!)
 ) where
 
-import Data.IORef ( IORef, readIORef, writeIORef )
+import Data.IORef (IORef, readIORef, writeIORef)
+import GHC.Conc (STM, TVar, readTVar, writeTVar)
+import Data.STRef (STRef, readSTRef, writeSTRef)
+import Control.Monad.ST.Safe (ST)
 
 --------------------------------------------------------------------------------
 
@@ -40,8 +43,9 @@ class HasGetter g m | g -> m where
    -- | Read the value of a state variable.
    get :: g a -> m a
 
-instance HasGetter IORef IO where
-   get = readIORef
+instance HasGetter IORef IO where get = readIORef
+instance HasGetter TVar STM where get = readTVar
+instance HasGetter (STRef s) (ST s) where get = readSTRef
 
 -- | A concrete implementation of a read-only state variable, carrying an IO
 -- action to read the value.
@@ -61,8 +65,9 @@ class HasSetter s m where
    -- | Write a new value into a state variable.
    ($=) :: s a -> a -> m ()
 
-instance HasSetter IORef IO where
-   ($=) = writeIORef
+instance HasSetter IORef IO where ($=) = writeIORef
+instance HasSetter TVar STM where ($=) = writeTVar
+instance HasSetter (STRef s) (ST s) where ($=) = writeSTRef
 
 -- | A concrete implementation of a write-only state variable, carrying an IO
 -- action to write the new value.
@@ -119,15 +124,17 @@ v $~! f = do
 (&) :: s -> (s -> t) -> t
 s & t = t s
 
-(^=) :: HasSetter v m => (s -> v a) -> a -> s -> m ()
+(^=) :: HasSetter g m => (s -> g a) -> a -> s -> m ()
 (fv ^= v) s = fv s $= v
 
-(^~) :: (Monad m, HasGetter v m, HasSetter v m) => (s -> v a) -> (a -> a) -> s -> m ()
+(^~) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a -> a) -> s -> m ()
 (fv ^~ f) s = v $~ f where v = fv s
 
-(^=!) :: (Monad m, HasSetter v m) => (s -> v a) -> a -> s -> m ()
+(^=!) :: (Monad m, HasSetter g m) => (s -> g a) -> a -> s -> m ()
 (fv ^=! x) s = v $=! x where v = fv s
 
-(^~!) :: (Monad m, HasGetter v m, HasSetter v m) => (s -> v a) -> (a ->a) -> s -> m ()
+(^~!) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a ->a) -> s -> m ()
 (fv ^~! f) s = v $~! f where v = fv s
+
+--------------------------------------------------------------------------------
 
