@@ -24,7 +24,7 @@ module Data.StateVar.Trans (
    StateVar, makeStateVar,
    -- * Utility Functions
    ($~), ($=!), ($~!),
-   (&), (^=), (^~), (^=!), (^~!)
+   (&), (@=), (@~), (@=!), (@~!), (@.)
 ) where
 
 import Data.IORef (IORef, readIORef, writeIORef)
@@ -124,17 +124,22 @@ v $~! f = do
 (&) :: s -> (s -> t) -> t
 s & t = t s
 
-(^=) :: HasSetter g m => (s -> g a) -> a -> s -> m ()
-(fv ^= v) s = fv s $= v
+infixl 8 @=, @~, @=!, @~!, @.
 
-(^~) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a -> a) -> s -> m ()
-(fv ^~ f) s = v $~ f where v = fv s
+(@=) :: HasSetter g m => (s -> g a) -> a -> s -> m ()
+(fv @= v) s = fv s $= v
 
-(^=!) :: (Monad m, HasSetter g m) => (s -> g a) -> a -> s -> m ()
-(fv ^=! x) s = v $=! x where v = fv s
+(@~) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a -> a) -> s -> m ()
+(fv @~ f) s = v $~ f where v = fv s
 
-(^~!) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a ->a) -> s -> m ()
-(fv ^~! f) s = v $~! f where v = fv s
+(@=!) :: (Monad m, HasSetter g m) => (s -> g a) -> a -> s -> m ()
+(fv @=! x) s = v $=! x where v = fv s
+
+(@~!) :: (Monad m, HasGetter g m, HasSetter g m) => (s -> g a) -> (a ->a) -> s -> m ()
+(fv @~! f) s = v $~! f where v = fv s
+
+(@.) :: (Monad m, HasGetter g m, HasGetter h m) => (s -> g a) -> (a -> h b) -> s -> GettableStateVar m b
+(fg @. fh) s = makeGettableStateVar $ get (fg s) >>= get . fh
 
 --------------------------------------------------------------------------------
 
