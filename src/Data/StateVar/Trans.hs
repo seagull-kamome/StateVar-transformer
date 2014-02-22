@@ -21,7 +21,7 @@ module Data.StateVar.Trans (
    HasSetter(..),
    SettableStateVar, makeSettableStateVar,
    -- * General State Variables
-   StateVar, makeStateVar,
+   StateVar, makeStateVar, makePtrVar,
    -- * Utility Functions
    ($~), ($=!), ($~!),
    (&),
@@ -32,8 +32,11 @@ module Data.StateVar.Trans (
 import Data.IORef (IORef, readIORef, writeIORef)
 import GHC.Conc (STM, TVar, readTVar, writeTVar)
 import Data.STRef (STRef, readSTRef, writeSTRef)
+import Foreign.Ptr (Ptr)
+import Foreign.Storable
 import Control.Monad.ST.Safe (ST)
 import Control.Monad.Trans (MonadTrans(..))
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader.Class (MonadReader(..))
 
 --------------------------------------------------------------------------------
@@ -47,9 +50,15 @@ class HasGetter g m | g -> m where
    -- | Read the value of a state variable.
    get :: g a -> m a
 
-instance HasGetter IORef IO where get = readIORef
-instance HasGetter TVar STM where get = readTVar
-instance HasGetter (STRef s) (ST s) where get = readSTRef
+instance HasGetter IORef IO where
+  get = readIORef
+  {-# INLINE get #-}
+instance HasGetter TVar STM where
+  get = readTVar
+  {-# INLINE get #-}
+instance HasGetter (STRef s) (ST s) where
+  get = readSTRef
+  {-# INLINE get #-}
 
 -- | A concrete implementation of a read-only state variable, carrying an IO
 -- action to read the value.
@@ -114,6 +123,10 @@ instance HasSetter (StateVar m) m where
 makeStateVar :: m a -> (a -> m ()) -> StateVar m a
 makeStateVar g s = StateVar (makeGettableStateVar g) (makeSettableStateVar s)
 {-# INLINE makeStateVar #-}
+
+makePtrVar :: (MonadIO m, Storable a) => Ptr a -> StateVar m a
+makePtrVar p = makeStateVar (liftIO $ peek p) (liftIO . poke p)
+{-# INLINE makePtrVar #-}
 
 --------------------------------------------------------------------------------
 
