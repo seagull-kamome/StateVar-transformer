@@ -3,6 +3,7 @@
 -- |
 -- Module      :  Data.StateVar
 -- Copyright   :  (c) Sven Panne 2009
+--                (c) HATTORI,HIROKI 2014
 -- License     :  BSD-style (see the file LICENSE)
 -- 
 -- Maintainer  :  HATTORI, HIROKI <seagull.kamome@gmail.com>
