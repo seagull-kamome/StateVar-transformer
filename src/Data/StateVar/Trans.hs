@@ -17,12 +17,12 @@
 module Data.StateVar.Trans (
    -- * Readable State Variables
    HasGetter(..),
-   GettableStateVar, makeGettableStateVar,
+   GettableStateVar, makeGettableStateVar, makeGettableStateVar',
    -- * Writable State Variables
    HasSetter(..),
-   SettableStateVar, makeSettableStateVar,
+   SettableStateVar, makeSettableStateVar, makeSettableStateVar',
    -- * General State Variables
-   StateVar, makeStateVar, makePtrVar,
+   StateVar, makeStateVar, makePtrVar, makeStateVar',
    -- * Utility Functions
    ($~), ($=!), ($~!),
    (&),
@@ -74,6 +74,10 @@ makeGettableStateVar :: m a -> GettableStateVar m a
 makeGettableStateVar = GettableStateVar
 {-# INLINE makeGettableStateVar #-}
 
+makeGettableStateVar' :: (s -> m a) -> s -> GettableStateVar m a
+makeGettableStateVar' getter x = makeGettableStateVar $ getter x
+{-# INLINE makeGettableStateVar' #-}
+
 --------------------------------------------------------------------------------
 
 -- | The class of all writable state variables.
@@ -104,6 +108,10 @@ makeSettableStateVar :: (a -> m ()) -> SettableStateVar m a
 makeSettableStateVar = SettableStateVar
 {-# INLINE makeSettableStateVar #-}
 
+makeSettableStateVar' :: (s -> a -> m ()) -> s -> SettableStateVar m a
+makeSettableStateVar' setter x = makeSettableStateVar $ setter x
+{-# INLINE makeSettableStateVar' #-}
+
 --------------------------------------------------------------------------------
 
 -- | A concrete implementation of a readable and writable state variable,
@@ -124,6 +132,10 @@ instance HasSetter (StateVar m) m where
 makeStateVar :: m a -> (a -> m ()) -> StateVar m a
 makeStateVar g s = StateVar (makeGettableStateVar g) (makeSettableStateVar s)
 {-# INLINE makeStateVar #-}
+
+makeStateVar' :: (s -> m a) -> (s -> a -> m ()) -> s -> StateVar m a
+makeStateVar' getter setter x = makeStateVar (getter x) (setter x)
+{-# INLINE makeStateVar' #-}
 
 makePtrVar :: (MonadIO m, Storable a) => Ptr a -> StateVar m a
 makePtrVar p = makeStateVar (liftIO $ peek p) (liftIO . poke p)
